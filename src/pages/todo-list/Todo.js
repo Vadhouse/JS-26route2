@@ -1,10 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getTodosList, createTodo, deleteTodo } from '../../api/api';
 import Loader from '../../components/Loader/Loader';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
 
 const Todo = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { data, isFetching } = useQuery({
     queryKey: ['todosList'],
     queryFn: getTodosList,
@@ -99,89 +100,92 @@ const Todo = () => {
   };
 
   return (
-    <div style={styles.wrapper}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>Туду Ліст</h1>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            marginBottom: '12px',
-          }}
-        >
-          <button
-            onClick={handleAddTodo}
-            disabled={isFetching || isAdding}
+    <>
+      <button onClick={() => navigate(-1)}>Повернутись назад</button>
+      <div style={styles.wrapper}>
+        <div style={styles.card}>
+          <h1 style={styles.title}>Туду Ліст</h1>
+          <div
             style={{
-              padding: '8px 14px',
-              borderRadius: '8px',
-              border: 'none',
-              background: '#2563eb',
-              color: '#fff',
-              cursor: 'pointer',
+              display: 'flex',
+              justifyContent: 'center',
+              marginBottom: '12px',
             }}
           >
-            додати todo
-          </button>
-        </div>
-        {isFetching && <Loader />}
+            <button
+              onClick={handleAddTodo}
+              disabled={isFetching || isAdding}
+              style={{
+                padding: '8px 14px',
+                borderRadius: '8px',
+                border: 'none',
+                background: '#2563eb',
+                color: '#fff',
+                cursor: 'pointer',
+              }}
+            >
+              додати todo
+            </button>
+          </div>
+          {isFetching && <Loader />}
 
-        <ul style={styles.list}>
-          {data && data.length ? (
-            data.map((todo) => (
-              <li key={todo.id} style={styles.item}>
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
-                >
-                  <div>
-                    <div style={styles.itemTitle}>{todo.title}</div>
-                    <div style={styles.itemDesc}>{todo.description}</div>
-                  </div>
+          <ul style={styles.list}>
+            {data && data.length ? (
+              data.map((todo) => (
+                <li key={todo.id} style={styles.item}>
                   <div
                     style={{
-                      marginLeft: '12px',
                       display: 'flex',
-                      gap: '8px',
+                      justifyContent: 'space-between',
                       alignItems: 'center',
                     }}
                   >
-                    <Link
-                      to={`/todo-list/${todo.id}`}
-                      target='_blank'
-                      className='action-link'
-                    >
-                      Редагувати
-                    </Link>
-                    <button
-                      onClick={() => handleDelete(todo.id)}
-                      disabled={isFetching || isDeleting}
+                    <div>
+                      <div style={styles.itemTitle}>{todo.title}</div>
+                      <div style={styles.itemDesc}>{todo.description}</div>
+                    </div>
+                    <div
                       style={{
-                        padding: '6px 10px',
-                        borderRadius: '8px',
-                        border: 'none',
-                        background: '#dc2626',
-                        color: '#fff',
-                        cursor: 'pointer',
+                        marginLeft: '12px',
+                        display: 'flex',
+                        gap: '8px',
+                        alignItems: 'center',
                       }}
                     >
-                      видалити todo
-                    </button>
+                      <Link
+                        to={`/todo-list/${todo.id}`}
+                        target='_blank'
+                        className='action-link'
+                      >
+                        Редагувати
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(todo.id)}
+                        disabled={isFetching || isDeleting}
+                        style={{
+                          padding: '6px 10px',
+                          borderRadius: '8px',
+                          border: 'none',
+                          background: '#dc2626',
+                          color: '#fff',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        видалити todo
+                      </button>
+                    </div>
                   </div>
-                </div>
+                </li>
+              ))
+            ) : (
+              <li style={styles.item}>
+                <div style={styles.itemTitle}>Немає todo</div>
               </li>
-            ))
-          ) : (
-            <li style={styles.item}>
-              <div style={styles.itemTitle}>Немає todo</div>
-            </li>
-          )}
-        </ul>
+            )}
+          </ul>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
