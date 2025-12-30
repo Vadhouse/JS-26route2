@@ -14,5 +14,12 @@
       "checked": "false",
       "creationDate": "дата створення"
     }
+  ],
+  "auth": [
+    {
+      "id": 1,
+      "username": "admin",
+      "email": "admin@gmail.com"
+    }
   ]
 }

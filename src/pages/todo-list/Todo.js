@@ -1,12 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getTodosList, createTodo, deleteTodo } from '../../api/api';
 import Loader from '../../components/Loader/Loader';
-import { useLocation, Link, useNavigate } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 
 const Todo = () => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const { data, isFetching } = useQuery({
+
+  const { data, isFetching, isError, error } = useQuery({
     queryKey: ['todosList'],
     queryFn: getTodosList,
     refetchOnMount: true,
@@ -101,7 +101,6 @@ const Todo = () => {
 
   return (
     <>
-      <button onClick={() => navigate(-1)}>Повернутись назад</button>
       <div style={styles.wrapper}>
         <div style={styles.card}>
           <h1 style={styles.title}>Туду Ліст</h1>
@@ -128,6 +127,33 @@ const Todo = () => {
             </button>
           </div>
           {isFetching && <Loader />}
+
+          {isError && (
+            <div
+              style={{
+                padding: '12px',
+                background: '#fee2e2',
+                borderRadius: '8px',
+                color: '#b91c1c',
+                marginBottom: '12px',
+                textAlign: 'center',
+              }}
+            >
+              Помилка завантаження todos. Переконайтеся, що локальний
+              JSON-сервер запущений: <code>npm run server</code>
+              {error?.message && (
+                <div
+                  style={{
+                    marginTop: '8px',
+                    fontSize: '13px',
+                    color: '#7f1d1d',
+                  }}
+                >
+                  {error.message}
+                </div>
+              )}
+            </div>
+          )}
 
           <ul style={styles.list}>
             {data && data.length ? (
@@ -171,7 +197,7 @@ const Todo = () => {
                           cursor: 'pointer',
                         }}
                       >
-                        видалити todo
+                        Bидалити todo
                       </button>
                     </div>
                   </div>

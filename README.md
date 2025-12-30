@@ -39,6 +39,24 @@ Instead, it will copy all the configuration files and the transitive dependencie
 
 You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
 
+## Запуск локального JSON-сервера (для `todos`)
+
+Для того, щоб `todos` завантажувалися з `db.json`, запустіть у терміналі локальний JSON-сервер:
+
+1. Встановити залежності (один раз):
+
+```bash
+npm install
+```
+
+2. У новому терміналі запустити сервер:
+
+```bash
+npm run server
+```
+
+Сервер буде доступний на `http://localhost:3030` і ендпоінт `http://localhost:3030/todos` поверне список задач.
+
 ## Learn More
 
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).

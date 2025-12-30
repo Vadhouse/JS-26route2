@@ -1,6 +1,6 @@
 import BounceLoader from 'react-spinners/BounceLoader';
 
-const Loader = ({ loading = true, size = 80 }) => {
+const Loader = ({ loading = true, size = 155 }) => {
   return (
     <div
       style={{
