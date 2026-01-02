@@ -1,8 +1,16 @@
 import { useEffect } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 
-const Layout = () => {
+const Layout = ({
+  isAuthenticated = false,
+  loginUser = { username: '', email: '' },
+  setIsAuthenticated,
+  setLoginUser,
+}) => {
   const navigate = useNavigate();
+
+  // Дебаг: перевіряємо чи отримуємо правильні пропси
+  console.log('Layout props:', { isAuthenticated, loginUser });
 
   useEffect(() => {
     const handler = (e) => {
@@ -14,6 +22,14 @@ const Layout = () => {
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
   }, [navigate]);
+
+  const handleLogout = () => {
+    // Скидаємо стан аутентифікації
+    setIsAuthenticated(false);
+    setLoginUser({ username: '', email: '' });
+    // Перенаправляємо на головну сторінку
+    navigate('/');
+  };
 
   return (
     <>
@@ -45,6 +61,11 @@ const Layout = () => {
           >
             Про застосунок
           </NavLink>
+          {isAuthenticated && (
+            <button onClick={handleLogout} className='nav-link'>
+              Log Out
+            </button>
+          )}
         </nav>
       </header>
       <main>

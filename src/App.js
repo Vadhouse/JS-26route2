@@ -47,6 +47,8 @@ function App() {
               isFetching={isFetching}
               isAuthenticated={isAuthenticated}
               loginUser={loginUser}
+              setIsAuthenticated={setIsAuthenticated}
+              setLoginUser={setLoginUser}
             />
           }
         >
