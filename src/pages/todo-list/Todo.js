@@ -1,10 +1,18 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getTodosList, createTodo, deleteTodo } from '../../api/api';
+import {
+  getTodosList,
+  createTodo,
+  deleteTodo,
+  updateTodo,
+} from '../../api/api';
 import Loader from '../../components/Loader/Loader';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import { useState } from 'react';
 
 const Todo = () => {
   const location = useLocation();
+  const [editingTodo, setEditingTodo] = useState(null);
+  const [editForm, setEditForm] = useState({ title: '', description: '' });
 
   const { data, isFetching, isError, error } = useQuery({
     queryKey: ['todosList'],
@@ -23,6 +31,17 @@ const Todo = () => {
       mutationFn: (id) => deleteTodo(id),
       onSuccess: () =>
         queryClient.invalidateQueries({ queryKey: ['todosList'] }),
+    }
+  );
+
+  const { mutateAsync: updateMutateAsync, isLoading: isUpdating } = useMutation(
+    {
+      mutationFn: ({ id, payload }) => updateTodo(id, payload),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['todosList'] });
+        setEditingTodo(null);
+        setEditForm({ title: '', description: '' });
+      },
     }
   );
 
@@ -51,6 +70,29 @@ const Todo = () => {
     const ok = window.confirm('Видалити цей todo?');
     if (!ok) return;
     await deleteMutateAsync(id);
+  };
+
+  const handleEdit = (todo) => {
+    setEditingTodo(todo);
+    setEditForm({ title: todo.title, description: todo.description });
+  };
+
+  const handleEditChange = (e) => {
+    setEditForm((p) => ({ ...p, [e.target.name]: e.target.value }));
+  };
+
+  const handleEditSave = async (e) => {
+    e.preventDefault();
+    if (!editingTodo) return;
+    await updateMutateAsync({
+      id: editingTodo.id,
+      payload: { ...editingTodo, ...editForm },
+    });
+  };
+
+  const handleEditCancel = () => {
+    setEditingTodo(null);
+    setEditForm({ title: '', description: '' });
   };
 
   console.log(location.state);
@@ -178,13 +220,20 @@ const Todo = () => {
                         alignItems: 'center',
                       }}
                     >
-                      <Link
-                        to={`/todo-list/${todo.id}`}
-                        target='_blank'
-                        className='action-link'
+                      <button
+                        onClick={() => handleEdit(todo)}
+                        disabled={isFetching}
+                        style={{
+                          padding: '6px 10px',
+                          borderRadius: '8px',
+                          border: 'none',
+                          background: '#2563eb',
+                          color: '#fff',
+                          cursor: 'pointer',
+                        }}
                       >
                         Редагувати
-                      </Link>
+                      </button>
                       <button
                         onClick={() => handleDelete(todo.id)}
                         disabled={isFetching || isDeleting}
@@ -211,6 +260,115 @@ const Todo = () => {
           </ul>
         </div>
       </div>
+
+      {/* Модальне вікно для редагування */}
+      {editingTodo && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1000,
+            padding: '20px',
+          }}
+          onClick={handleEditCancel}
+        >
+          <div
+            style={{
+              background: '#ffffff',
+              padding: '22px',
+              borderRadius: '10px',
+              boxShadow: '0 8px 24px rgba(16,24,40,0.06)',
+              width: '100%',
+              maxWidth: '500px',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 style={{ marginTop: 0, marginBottom: '16px' }}>
+              Редагування Туду
+            </h2>
+            <form onSubmit={handleEditSave}>
+              <input
+                name='title'
+                placeholder='Назва'
+                value={editForm.title}
+                onChange={handleEditChange}
+                style={{
+                  display: 'block',
+                  width: '95%',
+                  marginBottom: '12px',
+                  padding: '10px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #e5e7eb',
+                  fontSize: '14px',
+                }}
+                required
+              />
+              <textarea
+                name='description'
+                placeholder='Опис'
+                value={editForm.description}
+                onChange={handleEditChange}
+                style={{
+                  display: 'block',
+                  width: '95%',
+                  marginBottom: '12px',
+                  padding: '10px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #e5e7eb',
+                  fontSize: '14px',
+                  minHeight: '120px',
+                  resize: 'vertical',
+                }}
+                required
+              />
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '12px',
+                  justifyContent: 'flex-end',
+                }}
+              >
+                <button
+                  type='button'
+                  onClick={handleEditCancel}
+                  disabled={isUpdating}
+                  style={{
+                    padding: '8px 14px',
+                    borderRadius: '8px',
+                    border: '1px solid #e5e7eb',
+                    background: '#ffffff',
+                    color: '#374151',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Скасувати
+                </button>
+                <button
+                  type='submit'
+                  disabled={isUpdating}
+                  style={{
+                    padding: '8px 14px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: '#2563eb',
+                    color: '#fff',
+                    cursor: isUpdating ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  {isUpdating ? 'Зберігаю...' : 'Зберегти'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 };

@@ -15,7 +15,6 @@ import PrivateRoutes from './components/PrivateRoutes/PrivateRoutes';
 
 const Home = lazy(() => import('./pages/home/home'));
 const Todo = lazy(() => import('./pages/todo-list/Todo'));
-const TodoEdit = lazy(() => import('./pages/todo-list/TodoEdit'));
 const About = lazy(() => import('./pages/about/about'));
 const Layout = lazy(() => import('./components/Layout/Layout'));
 const NotFoundPage = lazy(() => import('./pages/not-found/not-found'));
@@ -69,7 +68,6 @@ function App() {
               </PrivateRoutes>
             }
           />
-          <Route path='/todo-list/:id' element={<TodoEdit />} />
           <Route
             path='/about'
             element={
