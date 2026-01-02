@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Loader from '../../components/Loader/Loader';
+import { getAllUsers } from '../../api/api';
 
 const Login = ({ setLoginUser, setIsAuthenticated }) => {
   const [form, setForm] = useState({ username: '', email: '' });
@@ -14,7 +15,10 @@ const Login = ({ setLoginUser, setIsAuthenticated }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.username.trim() || !form.email.trim()) {
+    const trimmedUsername = form.username.trim();
+    const trimmedEmail = form.email.trim();
+
+    if (!trimmedUsername || !trimmedEmail) {
       setError('Введіть username та email');
       return;
     }
@@ -22,13 +26,33 @@ const Login = ({ setLoginUser, setIsAuthenticated }) => {
     setIsLoading(true);
 
     try {
-      // simulate async save
-      await new Promise((res) => setTimeout(res, 700));
-      setLoginUser({ username: form.username, email: form.email });
+      // Отримуємо список користувачів для валідації
+      const users = await getAllUsers();
+
+      // Перевіряємо чи існує користувач з такими даними
+      const validUser = users.find(
+        (user) =>
+          String(user.username || '')
+            .trim()
+            .toLowerCase() === trimmedUsername.toLowerCase() &&
+          String(user.email || '')
+            .trim()
+            .toLowerCase() === trimmedEmail.toLowerCase()
+      );
+
+      if (!validUser) {
+        setError('Невірний username або email');
+        setIsLoading(false);
+        return;
+      }
+
+      // Якщо валідація пройшла успішно
+      setLoginUser({ username: trimmedUsername, email: trimmedEmail });
       setIsAuthenticated(true);
       navigate('/todo-list');
     } catch (err) {
-      setError('Невідома помилка');
+      console.error('Login error:', err);
+      setError('Помилка авторизації. Спробуйте ще раз');
     } finally {
       setIsLoading(false);
     }
@@ -53,7 +77,7 @@ const Login = ({ setLoginUser, setIsAuthenticated }) => {
     },
     field: {
       display: 'block',
-      width: '100%',
+      width: '95%',
       marginBottom: '12px',
       padding: '10px 12px',
       borderRadius: '8px',
