@@ -20,6 +20,11 @@
       "id": 1,
       "username": "admin",
       "email": "admin@gmail.com"
+    },
+    {
+      "id": 2,
+      "username": "vad",
+      "email": "vad@gmail.com"
     }
   ]
 }

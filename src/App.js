@@ -20,6 +20,7 @@ const Layout = lazy(() => import('./components/Layout/Layout'));
 const NotFoundPage = lazy(() => import('./pages/not-found/not-found'));
 const ErrorPage = lazy(() => import('./pages/error-page/error-page'));
 const Login = lazy(() => import('./pages/login/login'));
+const Registration = lazy(() => import('./pages/registration/registration'));
 
 function App() {
   const [loginUser, setLoginUser] = useState(() => {
@@ -62,6 +63,15 @@ function App() {
             element={
               <Login
                 userList={userList}
+                setIsAuthenticated={setIsAuthenticated}
+                setLoginUser={setLoginUser}
+              />
+            }
+          />
+          <Route
+            path='/registration'
+            element={
+              <Registration
                 setIsAuthenticated={setIsAuthenticated}
                 setLoginUser={setLoginUser}
               />

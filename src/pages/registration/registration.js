@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Loader from '../../components/Loader/Loader';
-import { getAllUsers } from '../../api/api';
+import { getAllUsers, addUser } from '../../api/api';
 
-const Login = ({ setLoginUser, setIsAuthenticated }) => {
+const Registration = ({ setLoginUser, setIsAuthenticated }) => {
   const [form, setForm] = useState({ username: '', email: '' });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -22,41 +22,68 @@ const Login = ({ setLoginUser, setIsAuthenticated }) => {
       setError('Введіть username та email');
       return;
     }
+
+    // Перевірка формату email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      setError('Введіть коректний email');
+      return;
+    }
+
     setError('');
     setIsLoading(true);
 
     try {
-      // Отримуємо список користувачів для валідації
+      // Отримуємо список користувачів для перевірки унікальності
       const users = await getAllUsers();
 
-      // Перевіряємо чи існує користувач з такими даними
-      const validUser = users.find(
+      // Перевіряємо чи існує користувач з таким username
+      const existingUser = users.find(
         (user) =>
           String(user.username || '')
             .trim()
-            .toLowerCase() === trimmedUsername.toLowerCase() &&
+            .toLowerCase() === trimmedUsername.toLowerCase() ||
           String(user.email || '')
             .trim()
             .toLowerCase() === trimmedEmail.toLowerCase()
       );
 
-      if (!validUser) {
-        setError('Невірний username або email');
+      if (existingUser) {
+        if (
+          String(existingUser.username || '')
+            .trim()
+            .toLowerCase() === trimmedUsername.toLowerCase()
+        ) {
+          setError('Користувач з таким username вже існує');
+        } else {
+          setError('Користувач з таким email вже існує');
+        }
         setIsLoading(false);
         return;
       }
 
-      // Якщо валідація пройшла успішно
+      // Створюємо нового користувача
+      const newId =
+        users.length > 0 ? Math.max(...users.map((u) => u.id)) + 1 : 1;
+      await addUser({
+        id: newId,
+        username: trimmedUsername,
+        email: trimmedEmail,
+      });
+
+      // Автоматично авторизуємо користувача після реєстрації
       const userData = { username: trimmedUsername, email: trimmedEmail };
       setLoginUser(userData);
       setIsAuthenticated(true);
+
       // Зберігаємо дані користувача в localStorage
       localStorage.setItem('username', trimmedUsername);
       localStorage.setItem('email', trimmedEmail);
+
       navigate('/todo-list');
     } catch (err) {
-      console.error('Login error:', err);
-      setError('Помилка авторизації. Спробуйте ще раз');
+      console.error('Registration error:', err);
+      setError('Помилка реєстрації. Спробуйте ще раз');
     } finally {
       setIsLoading(false);
     }
@@ -105,7 +132,7 @@ const Login = ({ setLoginUser, setIsAuthenticated }) => {
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h2 style={{ marginTop: 0 }}>Вхід</h2>
+        <h2 style={{ marginTop: 0 }}>Реєстрація</h2>
         <form onSubmit={handleSubmit}>
           <input
             name='username'
@@ -114,14 +141,17 @@ const Login = ({ setLoginUser, setIsAuthenticated }) => {
             value={form.username}
             onChange={handleChange}
             disabled={isLoading}
+            required
           />
           <input
             name='email'
+            type='email'
             placeholder='email'
             style={styles.field}
             value={form.email}
             onChange={handleChange}
             disabled={isLoading}
+            required
           />
 
           {error && (
@@ -131,8 +161,8 @@ const Login = ({ setLoginUser, setIsAuthenticated }) => {
           )}
 
           <div style={styles.actions}>
-            <Link to='/registration' style={styles.link}>
-              Немає акаунту? Зареєструватися
+            <Link to='/login' style={styles.link}>
+              Вже маєте акаунт? Увійти
             </Link>
             <button
               type='submit'
@@ -146,7 +176,7 @@ const Login = ({ setLoginUser, setIsAuthenticated }) => {
                 cursor: isLoading ? 'not-allowed' : 'pointer',
               }}
             >
-              {isLoading ? 'Зачекайте...' : 'Увійти'}
+              {isLoading ? 'Зачекайте...' : 'Зареєструватися'}
             </button>
           </div>
         </form>
@@ -157,4 +187,4 @@ const Login = ({ setLoginUser, setIsAuthenticated }) => {
   );
 };
 
-export default Login;
+export default Registration;
