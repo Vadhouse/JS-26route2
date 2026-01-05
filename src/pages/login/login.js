@@ -47,8 +47,12 @@ const Login = ({ setLoginUser, setIsAuthenticated }) => {
       }
 
       // Якщо валідація пройшла успішно
-      setLoginUser({ username: trimmedUsername, email: trimmedEmail });
+      const userData = { username: trimmedUsername, email: trimmedEmail };
+      setLoginUser(userData);
       setIsAuthenticated(true);
+      // Зберігаємо дані користувача в localStorage
+      localStorage.setItem('username', trimmedUsername);
+      localStorage.setItem('email', trimmedEmail);
       navigate('/todo-list');
     } catch (err) {
       console.error('Login error:', err);

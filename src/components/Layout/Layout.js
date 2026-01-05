@@ -27,6 +27,9 @@ const Layout = ({
     // Скидаємо стан аутентифікації
     setIsAuthenticated(false);
     setLoginUser({ username: '', email: '' });
+    // Очищаємо localStorage
+    localStorage.removeItem('username');
+    localStorage.removeItem('email');
     // Перенаправляємо на головну сторінку
     navigate('/');
   };

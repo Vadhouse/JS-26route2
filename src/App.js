@@ -22,20 +22,25 @@ const ErrorPage = lazy(() => import('./pages/error-page/error-page'));
 const Login = lazy(() => import('./pages/login/login'));
 
 function App() {
-  const [loginUser, setLoginUser] = useState({
-    username: 'null',
-    email: 'null',
+  const [loginUser, setLoginUser] = useState(() => {
+    const savedUsername = localStorage.getItem('username');
+    const savedEmail = localStorage.getItem('email');
+    if (savedUsername && savedEmail) {
+      return { username: savedUsername, email: savedEmail };
+    }
+    return { username: '', email: '' };
   });
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const { data, isFetching } = useQuery({
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    !!localStorage.getItem('username') && !!localStorage.getItem('email')
+  );
+
+  const { data: userList, isFetching } = useQuery({
     queryKey: ['userList'],
     queryFn: getAllUsers,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
   });
-
-  console.log({ data });
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
@@ -56,8 +61,9 @@ function App() {
             path='/login'
             element={
               <Login
-                setLoginUser={setLoginUser}
+                userList={userList}
                 setIsAuthenticated={setIsAuthenticated}
+                setLoginUser={setLoginUser}
               />
             }
           />
